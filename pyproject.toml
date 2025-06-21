@@ -1,0 +1,19 @@
+[project]
+name = "walmart-marketing-forecasting"
+version = "0.1.0"
+description = "Walmart sales forecasting and marketing
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jupyter>=1.1.1",
+    "lightgbm>=4.6.0",
+    "matplotlib>=3.10.3",
+    "mlforecast>=1.0.2",
+    "numpy>=2.2.6",
+    "pandas>=2.2.3",
+    "pydantic>=2.11.6",
+    "scikit-learn>=1.6.1",
+    "seaborn>=0.13.2",
+    "sktime>=0.37.0",
+    "statsforecast>=2.0.1",
+]
