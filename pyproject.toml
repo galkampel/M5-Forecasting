@@ -1,7 +1,7 @@
 [project]
 name = "walmart-marketing-forecasting"
 version = "0.1.0"
-description = "Walmart sales forecasting and marketing
+description = "Walmart sales forecasting and marketing"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
