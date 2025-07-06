@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # Main application service
+  m5-forecast:
+    build:
+      context: .
+      target: development
+    container_name: m5-forecast-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./src:/app/src
+      - ./config:/app/config
+    environment:
+      - PYTHONPATH=/app/src
+      - LOG_LEVEL=INFO
+      - ENABLE_MONITORING=true
+    command: ["uv", "run", "python", "-m", "src.preprocessing.main"]
+    depends_on:
+      - jupyter
+    networks:
+      - m5-network
+
+  # Jupyter development environment
+  jupyter:
+    build:
+      context: .
+      target: jupyter
+    container_name: m5-forecast-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./notebooks:/app/notebooks
+    environment:
+      - PYTHONPATH=/app/src
+      - JUPYTER_TOKEN=m5forecast
+      - JUPYTER_ENABLE_LAB=yes
+    command: ["uv", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=m5forecast"]
+    networks:
+      - m5-network
+
+  # Monitoring service
+  monitoring:
+    build:
+      context: .
+      target: monitoring
+    container_name: m5-forecast-monitoring
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./src:/app/src
+      - ./config:/app/config
+    environment:
+      - PYTHONPATH=/app/src
+      - ENABLE_MONITORING=true
+      - MONITORING_INTERVAL=1.0
+      - LOG_LEVEL=INFO
+    command: ["python", "/app/scripts/run_pipeline.py", "--output-dir", "/app/outputs/monitored_run"]
+    depends_on:
+      - m5-forecast
+    networks:
+      - m5-network
+
+  # Testing service
+  testing:
+    build:
+      context: .
+      target: testing
+    container_name: m5-forecast-testing
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./config:/app/config
+    environment:
+      - PYTHONPATH=/app/src
+      - PYTEST_ADDOPTS=-v --tb=short
+    command: ["uv", "run", "pytest", "tests/", "-v"]
+    networks:
+      - m5-network
+
+  # MLflow tracking server
+  mlflow:
+    image: python:3.12-slim
+    container_name: m5-forecast-mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlflow:/mlflow
+    environment:
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+    command: >
+      bash -c "
+        pip install mlflow &&
+        mlflow server
+        --host 0.0.0.0
+        --port 5000
+        --backend-store-uri /mlflow
+        --default-artifact-root /mlflow
+      "
+    networks:
+      - m5-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: m5-forecast-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - m5-network
+
+  # PostgreSQL for metadata storage (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: m5-forecast-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=m5forecast
+      - POSTGRES_USER=m5user
+      - POSTGRES_PASSWORD=m5password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - m5-network
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: m5-forecast-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - m5-forecast
+      - jupyter
+      - mlflow
+    networks:
+      - m5-network
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  m5-network:
+    driver: bridge 

@@ -10,10 +10,160 @@ dependencies = [
     "matplotlib>=3.10.3",
     "mlforecast>=1.0.2",
     "numpy>=2.2.6",
+    "optuna>=4.0.0",
     "pandas>=2.2.3",
     "pydantic>=2.11.6",
+    "pytest>=8.4.1",
+    "PyYAML>=6.0.1",
     "scikit-learn>=1.6.1",
+    "scipy>=1.13.0",
     "seaborn>=0.13.2",
     "sktime>=0.37.0",
     "statsforecast>=2.0.1",
+    "tqdm>=4.66.1",
+    # Testing & Quality Assurance
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.3.1",
+    "pytest-mock>=3.11.1",
+    "pytest-benchmark>=4.0.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.3.3",
+    # Monitoring & Observability
+    "psutil>=5.9.5",
+    "memory-profiler>=0.61.0",
+    "line-profiler>=4.1.0",
+    "mlflow>=2.8.0",
+    "wandb>=0.15.8",
+    "tensorboard>=2.13.0",
+    # Automation & CI/CD
+    "click>=8.1.7",
+    "rich>=13.5.2",
+    "typer>=0.9.0",
+    "python-dotenv>=1.0.0",
+    "schedule>=1.2.0",
+    "croniter>=1.4.1",
+    # Data Validation & Monitoring
+    "great-expectations>=0.17.23",
+    "evidently>=0.3.0",
+    "whylogs>=1.2.10",
+    "pandera>=0.17.2",
+    "streamlit>=1.46.0",
+    "plotly>=5.24.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.3.1",
+    "pytest-mock>=3.11.1",
+    "pytest-benchmark>=4.0.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.3.3",
+    "jupyter>=1.1.1",
+    "ipykernel>=6.25.0",
+]
+monitoring = [
+    "mlflow>=2.8.0",
+    "wandb>=0.15.8",
+    "tensorboard>=2.13.0",
+    "psutil>=5.9.5",
+    "memory-profiler>=0.61.0",
+    "line-profiler>=4.1.0",
+]
+validation = [
+    "great-expectations>=0.17.23",
+    "evidently>=0.3.0",
+    "whylogs>=1.2.10",
+    "pandera>=0.17.2",
+]
+
+[project.scripts]
+m5-forecast = "src.main:main"
+m5-preprocess = "src.preprocessing.main:main"
+m5-train = "src.preprocessing.pipelines.modeling_pipeline:main"
+m5-evaluate = "src.preprocessing.pipelines.evaluation_pipeline:main"
+m5-optimize = "src.preprocessing.pipelines.optimization_pipeline:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["src"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "e2e: marks tests as end-to-end tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]
