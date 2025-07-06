@@ -1,0 +1,27 @@
+app:
+  title: "M5 Forecasting Analysis Tool"
+  description: "Interactive data analysis and model evaluation for M5 forecasting"
+  
+data:
+  default_path: "data/processed"
+  supported_formats: ["csv", "parquet"]
+  max_file_size: "100MB"
+  
+models:
+  default_models: ["Ridge", "LGBMRegressor"]
+  baseline_models: ["Naive", "SeasonalNaive", "Zero"]
+  
+evaluation:
+  metrics: ["mae", "rmse", "mase", "rmsse", "mrae", "f1_zero", "non_zero_mae"]
+  seasonal_baseline: "SeasonalNaive"
+  zero_baseline: "ZeroModel"
+  
+visualization:
+  default_theme: "plotly_white"
+  max_points: 10000
+  chart_height: 500
+  
+monitoring:
+  enable_tracking: true
+  save_experiments: true
+  alert_threshold: 0.1

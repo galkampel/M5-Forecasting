@@ -1,0 +1,95 @@
+# Default preprocessing configuration
+
+# Data configuration
+data:
+  features_path: "../data/processed/features_2012-01-01_2015-12-31.csv"
+  targets_path: "../data/processed/target_features_2012-01-01_2015-12-31.csv"
+  output_dir: "../outputs/preprocessing"
+  cache_dir: "../cache"
+
+# Feature engineering
+features:
+  fourier:
+    enabled: true
+    periods: [365.25, 7]  # yearly and weekly seasonality
+    orders: [1, 1]        # number of harmonics
+    time_cols: ["day_of_year", "week_of_year"]
+    drop_time_cols: true
+  calendar:
+    enabled: true
+    include_events: true
+    include_snap: true
+  encoding:
+    baseline_categories:
+      weekday: "Monday"
+      month: 1
+      year: 2012
+      event: "No Event"
+    drop_first: true
+  scaling:
+    enabled: true
+    method: "standard"
+    threshold: 0.0
+    with_mean: true
+    with_std: true
+
+# Model configuration
+models:
+  ridge:
+    enabled: true
+    lags: [1, 7, 14, 30]
+    lag_transforms:
+      1: ["RollingMean", "RollingStd"]
+      7: ["RollingMean", "RollingStd"]
+      14: ["RollingMean"]
+      30: ["RollingMean"]
+    best_model_params:
+      alpha: 1.0
+  lgbm:
+    enabled: true
+    lags: [1, 7, 14, 30]
+    lag_transforms:
+      1: ["RollingMean", "RollingStd", "ExponentiallyWeightedMean"]
+      7: ["RollingMean", "RollingStd"]
+      14: ["RollingMean"]
+      30: ["RollingMean"]
+    best_model_params:
+      n_estimators: 100
+      learning_rate: 0.1
+      max_depth: 6
+
+# Cross-validation
+cv:
+  method: "expanding_window"
+  initial_window: 730  # 2 years
+  step_length: 30      # monthly steps
+  forecast_horizon: 31 # 1 month ahead
+
+# Evaluation
+evaluation:
+  metrics: ["mae", "rmse", "mape", "mase", "rmsse", "mrae", "f1_zero", "non_zero_mae"]
+  save_predictions: true
+  save_models: false
+  confidence_intervals: false
+  feature_importance: true
+
+# Hyperparameter optimization
+optimization:
+  enabled: false
+  framework: "optuna"
+  n_trials: 100
+  timeout: 3600  # 1 hour
+  study_name: "preprocessing_optimization"
+
+# Caching
+caching:
+  enabled: true
+  cache_dir: "../cache"
+  max_size: "2GB"
+  ttl: 7200  # 2 hours
+
+# Logging
+logging:
+  level: "INFO"
+  file: "../logs/preprocessing.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s" 

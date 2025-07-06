@@ -1,0 +1,50 @@
+# Default configuration for dataset preprocessing
+
+# Data paths
+data:
+  calendar_path: "data/calendar.csv"
+  sales_path: "data/sales_train_validation.csv"
+  prices_path: "data/sell_prices.csv"
+  output_dir: "data/processed"
+
+# Filtering parameters
+filters:
+  dept_id: "FOODS_3"
+  store_id: "CA_1"
+  mean_lb: 0.15
+  mean_ub: 0.5
+  predictability_q: 0.85
+
+# Date ranges
+dates:
+  start_date: "2012-01-01"
+  end_date: "2015-12-31"
+  test_date: "2015-07-01"
+  max_lag_size: 30
+
+# Column mappings
+columns:
+  target_col: "sales"
+  date_col: "date"
+  index_cols: ["store_id", "item_id"]
+  event_cols: ["event_name_1", "event_name_2"]
+
+# Processing options
+processing:
+  drop_baseline_events: true
+  drop_event_cols: false
+  set_non_zero_intervals: true
+  set_zero_intervals: true
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/dataset_processing.log"
+
+# Performance settings
+performance:
+  chunk_size: 10000
+  max_memory_usage: "4GB"
+  parallel_processing: true
+  num_workers: 4 
