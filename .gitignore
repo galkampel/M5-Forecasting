@@ -9,6 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
-
-output/
+data/new_datasets/
+data/*.csv
+outputs/
 logs/
+test_outputs/
